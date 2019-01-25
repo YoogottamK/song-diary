@@ -12,7 +12,7 @@ DATA="$DIR/db.csv"
 # Exit if no data found
 [ -e "$DATA" ] || { touch "$DATA"; }
 
-. ./menu.sh
+. songd-menu.sh
 
 #=====================================================
 # User used cli..Nice!

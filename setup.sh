@@ -35,7 +35,7 @@ fi
 #=====================================================
 # Begin the actual process
 #=====================================================
-FILES=( songd songd-add songd-del songd-edit songd-field songd-view menu.sh )
+FILES=( songd songd-add songd-del songd-edit songd-field songd-view songd-menu.sh )
 # MAN="songd.1"
 for file in ${FILES[@]}; do
     [ -e ./$file ] || { (>&2 echo File "$file" not found); (>&2 echo Aborting); exit 1; }

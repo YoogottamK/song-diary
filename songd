@@ -31,6 +31,10 @@ if (( $# > 0 )); then
             songd-field "$@"
             exit $?
             ;;
+        -h|--help )
+            . songd-help.sh
+            showHelp
+            ;;
         * )
             (>&2 echo Error in parsing "$1")
             (>&2 echo Aborting)
@@ -43,7 +47,7 @@ fi
 options=( add field delete edit view view-select )
 
 # Load the menu function
-. menu.sh
+. songd-menu.sh
 
 menu "${options[@]}"
 opt=$?

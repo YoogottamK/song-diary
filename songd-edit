@@ -53,7 +53,7 @@ else
 # User used interactive method
 #=====================================================
     # Load the menu function
-    . ./menu.sh
+    . songd-menu.sh
 
     heading="Please choose the song you want to edit"
 
