@@ -1,0 +1,136 @@
+#!/bin/bash
+
+#=====================================================
+# Setup the directories [if not already done]
+#=====================================================
+DIR="$HOME"/.config/songd
+HEADERS="$DIR/headers.csv"
+DATA="$DIR/db.csv"
+
+[ -d "$DIR" ] || mkdir -p "$DIR"
+[ -e "$HEADERS" ] || touch "$HEADERS"
+[ -e "$DATA" ] || touch "$DATA"
+
+#=====================================================
+# Set up the columns [if not already set]
+#=====================================================
+if [ ! -s "$HEADERS" ]; then
+    echo "id,title,artist,genre,year,localpath" > "$HEADERS"
+fi
+
+# the comma space hack, again
+COLUMNS=( $( cat "$HEADERS" | tr ',' '\n' | tr -s ' ' | tr ' ' ',' ) )
+INPUT=(  )
+n_col=${#COLUMNS[@]}
+
+#=====================================================
+# User used cli..Nice!
+#=====================================================
+if (( $# > 0 )); then
+
+    if (( $# % 2 != 0 )); then
+        (>&2 echo Please pass in the correct number of arguments and values)
+        (>&2 echo Aborting)
+        exit 1;
+    fi
+
+    while (( $# > 0 )); do
+        arg="$1"
+
+        case $arg in
+            -t|--title )
+                INPUT[1]="$2"
+                shift; shift ;;
+            -a|--artist )
+                INPUT[2]="$2"
+                shift; shift ;;
+            -g|--genre )
+                INPUT[3]="$2"
+                shift; shift ;;
+            -y|--year )
+                INPUT[4]="$2"
+                shift; shift ;;
+            -p|--path )
+                INPUT[5]="$2"
+                shift; shift ;;
+            --cf* )
+                sel=$( echo ${arg:4} )
+
+                # Check if the index provided is actually a number
+                re='^[0-9]+$'
+                [[ $sel =~ $re ]] || { (>&2 echo Error in parsing "$arg"); (>&2 echo Aborting); exit 1; }
+
+                nCustom=$( cat "$HEADERS" | tr ',' '\n' | wc -l )
+                nCustom=$(( $nCustom - 6 ))
+
+                if (( $sel > $nCustom )); then
+                    (>&2 echo Error in parsing "$arg")
+                    (>&2 echo You haven\'t defined those many fields)
+                    (>&2 echo Aborting)
+                    exit 1;
+                fi
+
+                INPUT[$(( $sel + 5 ))]="$2"
+                shift; shift ;;
+            * )
+                (>&2 echo Error in parsing "$1")
+                (>&2 echo Aborting)
+                exit 1 ;;
+        esac
+    done
+
+    [ -z "${INPUT[1]}" ] && { (>&2 echo You MUST provide the title for the song using -t or --title); exit 2; }
+
+else
+#=====================================================
+# User used interactive method
+#=====================================================
+    echo Enter the fields for the song
+    for (( i=1; $i<$n_col; i++ )); do
+        # reversing the comma space hack
+        echo -n Enter value for "$( echo ${COLUMNS[$i]} | tr ',' ' ' ): "
+        IFS= read -r INPUT[$i]
+    done
+
+    [ -z "${INPUT[1]}" ] && { (>&2 echo You MUST provide the title for the song); exit 2; }
+fi
+
+#=====================================================
+# Insert null values for uniformity between
+# interactive mode and cli
+#=====================================================
+for (( i=1; $i<$n_col; i++ )); do
+    [ -z "${INPUT[$i]}" ] && INPUT[$i]='-'
+
+    # ensure that input doesn't contain ',', which would mess up the csv
+    INPUT[$i]="$( echo "${INPUT[$i]}" | tr -d ',' )"
+done
+
+# Now, we have a valid song add request
+
+#=====================================================
+# Generate the id
+#=====================================================
+INPUT[0]=$( echo "${INPUT[1]}" | tr '[:upper:]' '[:lower:]' | md5sum | cut -d' ' -f1)
+
+#=====================================================
+# Check for duplicates
+#=====================================================
+DUP=$( cat "$DATA" | grep "${INPUT[0]}" | wc -l )
+
+if (( $DUP > 0 )); then
+    echo The song you entered already exists in the diary.
+    echo If you want to edit that entry, try songd-edit or select edit in the songd menu
+    exit 0
+fi
+
+#=====================================================
+# Now, we are ready to add this song to the db
+#=====================================================
+printf "%s," "${INPUT[@]}" | sed 's/,$/\n/' >> "$DATA"
+
+#=====================================================
+# Yay, we added one song to the db!!
+#=====================================================
+echo Song was succesfully added
+

@@ -1,0 +1,105 @@
+#!/bin/bash
+
+#=====================================================
+# File setup
+#=====================================================
+DIR="$HOME/.config/songd"
+HEADERS="$DIR/headers.csv"
+DATA="$DIR/db.csv"
+
+# Exit if headers file not found
+[ -s "$HEADERS" ] || { echo Currupted Data...; echo Please reinstall; exit 3; }
+# Exit if no data found
+[ -s "$DATA" ] || { echo List empty; echo Use songd-add or songd menu to add more songs; exit 0; }
+
+#=====================================================
+# If user wants to view specific rows
+# Supports basic regex
+#=====================================================
+COLUMNS=( $( cat "$HEADERS" | tr ',' '\n' ) )
+INPUT=(  )
+n_col=${#COLUMNS[@]}
+
+if (( $# > 0 )); then
+
+    if (( $# % 2 != 0 )); then
+        (>&2 echo Please pass in the correct number of arguments and values)
+        (>&2 echo Aborting)
+        exit 1;
+    fi
+
+    while (( $# > 0 )); do
+        arg="$1"
+
+        case $arg in
+            -t|--title )
+                INPUT[1]="$2"
+                shift; shift ;;
+            -a|--artist )
+                INPUT[2]="$2"
+                shift; shift ;;
+            -g|--genre )
+                INPUT[3]="$2"
+                shift; shift ;;
+            -y|--year )
+                INPUT[4]="$2"
+                shift; shift ;;
+            -p|--path )
+                INPUT[5]="$2"
+                shift; shift ;;
+            --cf* )
+                sel=$( echo ${arg:4} )
+
+                # Check if the index provided is actually a number
+                re='^[0-9]+$'
+                [[ $sel =~ $re ]] || { (>&2 echo Error in parsing "$arg"); (>&2 echo Aborting); exit 1; }
+
+                nCustom=$( cat "$HEADERS" | tr ',' '\n' | wc -l )
+                nCustom=$(( $nCustom - 6 ))
+
+                if (( $sel > $nCustom )); then
+                    (>&2 echo Error in parsing "$arg")
+                    (>&2 echo You haven\'t defined those many fields)
+                    (>&2 echo Aborting)
+                    exit 1;
+                fi
+
+                INPUT[$(( $sel + 5 ))]="$2"
+                shift; shift ;;
+            * )
+                (>&2 echo Error in parsing "$1")
+                (>&2 echo Aborting)
+                exit 1 ;;
+        esac
+    done
+
+    for (( i=0; $i<$n_col; i++ )); do
+        # make * work in here
+        INPUT[$i]="$( echo "${INPUT[$i]}" | tr -d ',' | sed 's/\*/[\^\,]\*/' )"
+
+        # select all if not specified
+        [ -z "${INPUT[$i]}" ] && INPUT[$i]='[^,]*'
+    done
+
+    query=$( printf "%s," "${INPUT[@]}" | sed 's/,$//g' )
+
+    selected=( $( cat "$HEADERS" ) )
+    # Forceful `quote` to accomodate spaces  `quote`
+    selected+=( "$( sed -n "/$query/Ip" "$DATA" )" )
+
+    if [ -z "${selected[1]}" ]; then
+        echo No songs were selected
+    else
+        echo Selected songs:
+
+        for selection in "${selected[@]}"; do
+            echo "$selection"
+        done | sed 's/,\(.\)/,\U\1/g' | cut -d, -f2- | awk '{ printf("%d,%s\n", i++, $0) }' | sed 's/^0/#/' | column -s, -t
+    fi
+else
+#=====================================================
+# Display all, no flags passed
+#=====================================================
+    cat $HEADERS | sed 's/,\(.\)/,\U\1/g' | cat - $DATA | cut -d, -f2- | awk '{ printf("%d,%s\n", i++, $0) }' | sed 's/^0/#/' | column -s, -t
+fi
+

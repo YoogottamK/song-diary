@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#=====================================================
+# The main starting point of everything
+#=====================================================
+
+if (( $# > 0 )); then
+    case "$1" in
+        --add )
+            shift;
+            songd-add "$@"
+            exit $?
+            ;;
+        --del )
+            shift;
+            songd-del "$@"
+            exit $?
+            ;;
+        --edit )
+            shift;
+            songd-edit "$@"
+            exit $?
+            ;;
+        --view )
+            shift;
+            songd-view "$@"
+            exit $?
+            ;;
+        --field )
+            shift;
+            songd-field "$@"
+            exit $?
+            ;;
+        * )
+            (>&2 echo Error in parsing "$1")
+            (>&2 echo Aborting)
+            exit 1 ;;
+    esac
+
+fi
+
+# list of options
+options=( add field delete edit view view-select )
+
+# Load the menu function
+. menu.sh
+
+menu "${options[@]}"
+opt=$?
+
+case $opt in
+    0 )
+        songd-add
+        ;;
+    1 )
+        songd-field
+        ;;
+    2 )
+        songd-del
+        ;;
+    3 )
+        songd-edit
+        ;;
+    4 )
+        songd-view
+        ;;
+    5 )
+        echo To view selected songs, you need to pass arguments to songd-view
+        echo Try songd-view [selection params]
+        ;;
+esac
+

@@ -1,0 +1,137 @@
+#!/bin/bash
+
+#=====================================================
+# File setup
+#=====================================================
+DIR="$HOME/.config/songd"
+HEADERS="$DIR/headers.csv"
+DATA="$DIR/db.csv"
+
+# Exit if headers file not found
+[ -s "$HEADERS" ] || { echo Currupted Data...; echo Please reinstall; exit 3; }
+# Exit if no data found
+[ -s "$DATA" ] || { echo List empty; echo Use songd-add or songd menu to add more songs; exit 0; }
+
+#=====================================================
+# User used cli..Nice!
+#=====================================================
+if (( $# > 0 )); then
+
+    if (( $# % 2 != 0 )); then
+        (>&2 echo Please pass in the correct number of arguments and values)
+        (>&2 echo Aborting)
+        exit 1;
+    fi
+
+    while (( $# > 0 )); do
+        arg="$1"
+
+        case $arg in
+            -i|--index )
+                index="$2"
+                shift; shift ;;
+            * )
+                (>&2 echo Error in parsing "$1")
+                (>&2 echo Aborting)
+                exit 1 ;;
+        esac
+    done
+
+    # Check if the index provided is actually a number
+    re='^[0-9]+$'
+    [[ $index =~ $re ]] || { (>&2 echo Please provide a valid index); exit 1; }
+
+    # Check if the index provided exceeds max value
+    if (( $index > $( wc -l "$DATA" | cut -d' ' -f1 ) )); then
+        (>&2 echo The index you provided exceeds the maximum index)
+        (>&2 echo Please provide a valid index)
+        exit 1
+    fi
+
+else
+#=====================================================
+# User used interactive method
+#=====================================================
+    # Load the menu function
+    . ./menu.sh
+
+    heading="Please choose the song you want to edit"
+
+    # convert spaces to comma hack for menu display
+    options=( $( cat "$DATA" | cut -d, -f2 | tr -s ' ' | tr ' ' ',' ) )
+
+    heading "$heading"
+    menu "${options[@]}"
+    index=$?
+    index=$(( $index+1 ))
+fi
+
+# Load the columns from the header file
+COLUMNS=( $( cat "$HEADERS" | tr ',' '\n' ) )
+n_col=${#COLUMNS[@]}
+
+# the comma space hack
+OLD=( $( sed -n $index'p' "$DATA" | tr ',' '\n' | tr -s ' ' | tr ' ' ',' ) )
+INPUT=(  )
+
+echo Editing song \#$index
+echo If you want to leave a field unchanged, just press [ENTER]
+
+#=====================================================
+# Actually edit
+#=====================================================
+for (( i=1; $i<$n_col; i++ )); do
+    # revert comma space hack
+    echo -n Enter new value for "${COLUMNS[$i]}""[$( echo ${OLD[$i]} | tr ',' ' ' )]: "
+    IFS= read -r INPUT[$i]
+done
+
+# revert the comma space hack
+for (( i=1; $i<${#OLD[@]}; i++ )); do
+    OLD[$i]="$( echo ${OLD[$i]} | tr ',' ' ' )"
+done
+
+#=====================================================
+# Leave unchanged, as promised
+#=====================================================
+for (( i=1; $i<$n_col; i++ )); do
+    if [ -z "${INPUT[$i]}" ]; then
+        INPUT[$i]="${OLD[$i]}"
+    fi
+done
+
+#=====================================================
+# Generate the id
+#=====================================================
+INPUT[0]=$( echo "${INPUT[1]}" | tr '[:upper:]' '[:lower:]' | md5sum | cut -d' ' -f1)
+
+# Delete old entry so that it doesn't clash with the duplicate check
+sed -i "$index d" "$DATA"
+
+#=====================================================
+# Check for duplicates
+#=====================================================
+DUP=$( cat "$DATA" | grep "${INPUT[0]}" | wc -l )
+
+if (( $DUP > 0 )); then
+    echo The edited song already exists in the diary.
+    echo No changes were made
+
+    # Append it again, no changes were made
+    row="$( printf "%s," "${OLD[@]}" | sed 's/,$/\n/' )"
+else
+    # row is the updated value
+    row="$( printf "%s," "${INPUT[@]}" | sed 's/,$/\n/' )"
+
+    # actually not yet, but will be...
+    echo Song edited succesfully
+fi
+
+# sed "a" doesnt't work when last line is changed use sed 'a' instead
+if (( $index > $( wc -l "$DATA" | cut -d' ' -f1 ) )); then
+    index=$(( $index - 1 ))
+    sed -i "$index a $row" "$DATA"
+else
+    sed -i "$index i $row" "$DATA"
+fi
+

@@ -1,0 +1,234 @@
+.TH songd 1 "Song Diary" "v1.0" "Song Diary"
+
+.SH NAME
+songd - Song Diary
+
+.SH SYNOPSIS
+.BI "songd [--add " "[ARGS]" "] [--del " "[ARGS]" "] [--edit " "[ARGS]" "] [--view " "[ARGS]" "] [--field " "[ARGS]" "]"
+
+.SH DESCRIPTION
+Song Diary: Store your favourite songs and access them easily using this utility.
+
+Arguments are not compulsory for most of the part.
+
+Running without arguments opens up an interactive menu from which you can select actions and proceed further with them
+
+.B --add:
+Add songs to the diary
+
+.RS
+If no arguments provided, input is taken in an interactive manner
+
+Arguments for add:
+
+.BI "-t, --title " "title" "[reqd]:"
+Specify the
+.I title
+of the song
+
+.BI "-a, --artist " "artist" ":"
+Specify the
+.I artist
+of the song
+
+.BI "-g, --genre " "genre" ":"
+Specify the
+.I genre
+of the song
+
+.BI "-y, --year " "year" ":"
+Specify the
+.I year
+of release of the song
+
+.BI "-p, --path " "path" ":"
+Specify
+.I path
+to the local audio file
+
+.BI "--cf* " "value" ":"
+Specify the
+.I value
+for custom fields added by user.
+Check the field section for more details
+.RE
+
+.B --del:
+Delete songs from the diary
+
+.RS
+If no arguments given, opens up an interactive menu for you to select the song to delete
+
+Arguments for del:
+
+.BI "-i, --index " "index" ":"
+Provide the
+.I index
+of the song to delete
+.RE
+
+.B --edit:
+Edit the existing entries in the diary
+
+.RS
+If no arguments given, opens up an interactive menu for you to select the song to edit
+
+Arguments for del:
+
+.BI "-i, --index " "index" ":"
+Provide the
+.I index
+of the song to edit
+.RE
+
+.B --view:
+View the songs present in the diary. Optional arguments to filter the songs
+
+.RS
+Arguments for view (Supports [*.] matching and more):
+
+.BI "-t, --title " "title" ":"
+Filter by the
+.I title
+of the song
+
+.BI "-a, --artist " "artist" ":"
+Filter by the
+.I artist
+of the song
+
+.BI "-g, --genre " "genre" ":"
+Filter by the
+.I genre
+of the song
+
+.BI "-y, --year " "year" ":"
+Filter by
+.I year
+of release of the song
+
+.BI "-p, --path " "path" ":"
+Filter by
+.I path
+to the local audio file
+
+.BI "--cf* " "value" ":"
+Filter by
+.I value
+for custom fields added by user.
+Check the field section for more details
+.RE
+
+.B --field:
+Manage custom fields for Song Diary.
+The default fields not enough? No problem.
+Add your own fields using this
+
+.RS
+Arguments for field:
+
+.BI "-a, --add " "name" ":"
+Add a new field with name
+.I name
+
+.B -d, --delete:
+Delete a custom field.
+Opens an interactive menu to select which field to delete
+
+.B -v, --view:
+List out all the custom fields and how to access them
+.RE
+
+.SH EXAMPLES
+songd is a very powerful command.
+Here are some useful examples.
+
+Add a song:
+
+.RS
+.B $ songd --add -t 'Theher Ja' -a 'Armaan Malik' -y 2018
+.RE
+
+Edit a song:
+
+.RS
+.B $ songd --edit
+
+Or if you know the index
+
+.B $ songd --edit -i 3
+.RE
+
+View a song:
+Filter like a pro
+
+.RS
+.B $ songd --view -t S\\\\*g
+
+Select songs made by any artist where the title starts with S and ends with g
+
+.RS
+Note: You need to escape the
+.I *
+.RE
+
+.B $ songd --view -y 19[5-9].
+
+Select all songs which were released in the range 1950-1999
+.RE
+
+Field manipulation:
+
+.RS
+.B $ songd --field -a rating
+
+Adds a new field named Rating
+
+.RS
+Note: The case doesn't matter.
+Always, the first character will be upper case and others lower case
+.RE
+
+.B $ songd --field -v
+
+Lists all available fields and their corresponding option specifiers [ --cf[x] ]
+.RE
+
+.SH EXIT STATUS
+songd returns the following error codes if it encounters problems
+
+0   Succesful execution
+
+1   Error in parsing the arguments or values
+
+2   Required argument / value not provided
+
+3   File not found
+
+.SH FILES
+.B ~/.config/songd/headers.csv
+.RS
+Location of the file where all the headers[fields] are stored
+.RE
+
+.B ~/.config/songd/db.csv
+.RS
+Location of the file where all the data is stored
+.RE
+
+.SH REQUIREMENTS
+This was created keeping bash in mind. This hasn't been tested on any other shell.
+
+Commands used:
+.I awk cat column cut echo grep md5sum printf read sed tr wc
+
+.SH BUGS
+¯\\_(ツ)_/¯
+
+.SH AUTHOR
+Written by Yoogottam Khandelwal <yoogottamk@outlook.com>
+
+.SH SEE ALSO
+Full source code available at
+.I https://github.com/yoogottamk
+

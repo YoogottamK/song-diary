@@ -1,0 +1,139 @@
+#!/bin/bash
+
+#=====================================================
+# File setup
+#=====================================================
+DIR="$HOME/.config/songd"
+HEADERS="$DIR/headers.csv"
+DATA="$DIR/db.csv"
+
+# Exit if headers file not found
+[ -s "$HEADERS" ] || { echo Currupted Data...; echo Please reinstall; exit 3; }
+# Exit if no data found
+[ -e "$DATA" ] || { touch "$DATA"; }
+
+. ./menu.sh
+
+#=====================================================
+# User used cli..Nice!
+#=====================================================
+if (( $# > 0 )); then
+
+    while (( $# > 0 )); do
+        arg="$1"
+
+        case $arg in
+            -a|--add )
+                action=0
+                field="$2"
+                shift; shift ;;
+            -d|--delete )
+                action=1
+                shift ;;
+            -v|--view )
+                action=2
+                shift ;;
+            * )
+                (>&2 echo Error in parsing "$1")
+                (>&2 echo Aborting)
+                exit 1 ;;
+        esac
+    done
+
+else
+#=====================================================
+# User used interactive method
+#=====================================================
+    options=( add delete view )
+    heading="Choose an action"
+
+    heading "$heading"
+    menu "${options[@]}"
+    action=$?
+fi
+
+if (( $action == 0 )); then
+#=====================================================
+# Add new field
+#=====================================================
+
+    if [ -z "$field" ]; then
+        echo -n "Enter the name for the new field: "
+        IFS= read -r field
+    fi
+
+    #=====================================================
+    # Sanitize the input
+    #=====================================================
+    field="$( echo $field | tr -d ',' | tr '[:upper:]' '[:lower:]' )"
+
+    #=====================================================
+    # If field exists
+    #=====================================================
+    if (( $( grep -iw "$field" "$HEADERS" | wc -l ) > 0 )); then
+        echo This field already exists in the list of headers
+    else
+    #=====================================================
+    # Else add the field
+    #=====================================================
+        sed -i "s/$/,$field/" "$HEADERS"
+        sed -i "s/$/,-/" "$DATA"
+
+        echo Field added!
+    fi
+
+    index=$( sed 's/,/\n/g' "$HEADERS" | grep -inx "$field" | cut -d: -f1 )
+    index=$(( $index - 6 ))
+    echo 'You can access it using --cf'"$index" or by the interactive menu
+elif (( $action == 1 )); then
+#=====================================================
+# Delete
+#=====================================================
+
+    # comma space hack, again
+    options=( $( cat "$HEADERS" | cut -d, -f7- | tr ',' '\n' | tr ' ' ',' ) )
+
+    if (( ${#options[@]} < 1 )); then
+        echo No custom field to delete
+        echo If you want to delete a field, add one first \;\)
+        echo You can add one using songd-field -a\|--add \<name\>
+        exit 0
+    fi
+
+    heading="Select a field to delete"
+
+    heading "$heading"
+    menu "${options[@]}"
+    field=$?
+
+    field=$(( $field + 7 ))
+
+    NEW_HEADERS="$( cat "$HEADERS" | cut -d, -f$field --complement )"
+    echo "$NEW_HEADERS" > "$HEADERS"
+
+    NEW_DATA="$( cat "$DATA" | cut -d, -f$field --complement )"
+    echo "$NEW_DATA" > "$DATA"
+
+else
+#=====================================================
+# List out
+#=====================================================
+
+    options=( $( cat "$HEADERS" | cut -d, -f7- | tr ',' '\n' | tr ' ' ',' ) )
+
+    if (( ${#options[@]} < 1 )); then
+        echo No cutom field defined currently
+        echo You can add one using songd-field -a\|--add \<name\>
+        exit 0
+    fi
+
+    echo Defined fields:
+
+    i=0
+    for opt in "${options[@]}"; do
+        i=$(( $i + 1 ))
+        echo \-\-cf$i: "$opt"
+    done
+
+fi
+
