@@ -163,16 +163,15 @@ View a song:
 Filter like a pro
 
 .RS
-.B $ songd --view -t S\\\\*g
+.B $ songd --view -t 'S*g'
 
 Select songs made by any artist where the title starts with S and ends with g
 
 .RS
-Note: You need to escape the
-.I *
+Note: Enclose the regex in quotes for proper parsing
 .RE
 
-.B $ songd --view -y 19[5-9].
+.B $ songd --view -y '19[5-9].'
 
 Select all songs which were released in the range 1950-1999
 .RE
