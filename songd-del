@@ -18,9 +18,16 @@ DATA="$DIR/db.csv"
 if (( $# > 0 )); then
 
     if (( $# % 2 != 0 )); then
-        (>&2 echo Please pass in the correct number of arguments and values)
-        (>&2 echo Aborting)
-        exit 1;
+        . songd-help.sh
+        if ( [ $# -eq 1 ] && [ "$1" = "-h" -o "$1" = "--help" ] ); then
+            echo -n Usage: songd --del [ARGS]
+            showHelp 2
+            exit 0
+        else
+            (>&2 echo Please pass in the correct number of arguments and values)
+            (>&2 echo Aborting)
+            exit 1
+        fi
     fi
 
     while (( $# > 0 )); do

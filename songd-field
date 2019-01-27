@@ -33,6 +33,10 @@ if (( $# > 0 )); then
             -v|--view )
                 action=2
                 shift ;;
+            -h )
+                . songd-help.sh
+                showHelp 5
+                exit 0 ;;
             * )
                 (>&2 echo Error in parsing "$1")
                 (>&2 echo Aborting)
