@@ -18,9 +18,16 @@ DATA="$DIR/db.csv"
 if (( $# > 0 )); then
 
     if (( $# % 2 != 0 )); then
-        (>&2 echo Please pass in the correct number of arguments and values)
-        (>&2 echo Aborting)
-        exit 1;
+        . songd-help.sh
+        if ( [ $# -eq 1 ] && [ "$1" = "-h" -o "$1" = "--help" ] ); then
+            ex=0
+        else
+            (>&2 echo Please pass in the correct number of arguments and values)
+            ex=1
+        fi
+        echo -n Usage: songd --edit [ARGS]
+        showHelp 3
+        exit $ex
     fi
 
     while (( $# > 0 )); do
@@ -53,7 +60,7 @@ else
 # User used interactive method
 #=====================================================
     # Load the menu function
-    . ./menu.sh
+    . songd-menu.sh
 
     heading="Please choose the song you want to edit"
 

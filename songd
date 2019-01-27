@@ -31,6 +31,11 @@ if (( $# > 0 )); then
             songd-field "$@"
             exit $?
             ;;
+        -h|--help )
+            . songd-help.sh
+            showHelp
+            exit $?
+            ;;
         * )
             (>&2 echo Error in parsing "$1")
             (>&2 echo Aborting)
@@ -40,10 +45,10 @@ if (( $# > 0 )); then
 fi
 
 # list of options
-options=( add field delete edit view view-select )
+options=( add delete edit view field "help" )
 
 # Load the menu function
-. menu.sh
+. songd-menu.sh
 
 menu "${options[@]}"
 opt=$?
@@ -65,8 +70,8 @@ case $opt in
         songd-view
         ;;
     5 )
-        echo To view selected songs, you need to pass arguments to songd-view
-        echo Try songd-view [selection params]
+        . songd-help.sh
+        showHelp
         ;;
 esac
 
