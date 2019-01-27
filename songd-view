@@ -82,7 +82,7 @@ if (( $# > 0 )); then
 
     for (( i=0; $i<$n_col; i++ )); do
         # make * work in here
-        INPUT[$i]="$( echo "${INPUT[$i]}" | tr -d ',' | sed 's/\*/[\^\,]\*/' )"
+        INPUT[$i]="$( echo "${INPUT[$i]}" | tr -s ',' '_' | sed 's/\*/[\^\,]\*/' )"
 
         # select all if not specified
         [ -z "${INPUT[$i]}" ] && INPUT[$i]='[^,]*'
