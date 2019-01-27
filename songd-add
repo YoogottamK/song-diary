@@ -110,7 +110,7 @@ for (( i=1; $i<$n_col; i++ )); do
     [ -z "${INPUT[$i]}" ] && INPUT[$i]='-'
 
     # ensure that input doesn't contain ',', which would mess up the csv
-    INPUT[$i]="$( echo "${INPUT[$i]}" | tr -d ',' )"
+    INPUT[$i]="$( echo "${INPUT[$i]}" | tr -s ',' '_' )"
 done
 
 # Now, we have a valid song add request
