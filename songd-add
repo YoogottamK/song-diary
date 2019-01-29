@@ -65,23 +65,20 @@ if (( $# > 0 )); then
 
                 # Check if the index provided is actually a number
                 re='^[0-9]+$'
-                [[ $sel =~ $re ]] || { (>&2 echo Error in parsing "$arg"); (>&2 echo Aborting); exit 1; }
+                [[ $sel =~ $re ]] || { (>&2 echo Error in parsing "$arg"; echo Aborting); exit 1; }
 
                 nCustom=$( cat "$HEADERS" | tr ',' '\n' | wc -l )
                 nCustom=$(( $nCustom - 6 ))
 
                 if (( $sel > $nCustom )); then
-                    (>&2 echo Error in parsing "$arg")
-                    (>&2 echo You haven\'t defined those many fields)
-                    (>&2 echo Aborting)
+                    (>&2 echo Error in parsing "$arg"; echo You haven\'t defined those many fields; echo Aborting)
                     exit 1;
                 fi
 
                 INPUT[$(( $sel + 5 ))]="$2"
                 shift; shift ;;
             * )
-                (>&2 echo Error in parsing "$1")
-                (>&2 echo Aborting)
+                (>&2 echo Error in parsing "$1"; echo Aborting)
                 exit 1 ;;
         esac
     done
