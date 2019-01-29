@@ -38,7 +38,7 @@ fi
 FILES=( songd songd-add songd-del songd-edit songd-field songd-view songd-menu.sh songd-help.sh )
 # MAN="songd.1"
 for file in ${FILES[@]}; do
-    [ -e ./$file ] || { (>&2 echo File "$file" not found); (>&2 echo Aborting); exit 1; }
+    [ -e ./$file ] || { (>&2 echo File "$file" not found; echo Aborting); exit 1; }
     cp "./$file" "$BIN"
     chmod +x "$BIN/$file"
 done

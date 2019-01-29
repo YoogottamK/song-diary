@@ -37,8 +37,7 @@ if (( $# > 0 )); then
             exit $?
             ;;
         * )
-            (>&2 echo Error in parsing "$1")
-            (>&2 echo Aborting)
+            (>&2 echo Error in parsing "$1"; echo Aborting)
             exit 1 ;;
     esac
 

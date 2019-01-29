@@ -38,8 +38,7 @@ if (( $# > 0 )); then
                 index="$2"
                 shift; shift ;;
             * )
-                (>&2 echo Error in parsing "$1")
-                (>&2 echo Aborting)
+                (>&2 echo Error in parsing "$1"; echo Aborting)
                 exit 1 ;;
         esac
     done
@@ -50,8 +49,7 @@ if (( $# > 0 )); then
 
     # Check if the index provided exceeds max value
     if (( $index > $( wc -l "$DATA" | cut -d' ' -f1 ) )); then
-        (>&2 echo The index you provided exceeds the maximum index)
-        (>&2 echo Please provide a valid index)
+        (>&2 echo The index you provided exceeds the maximum index; echo Please provide a valid index)
         exit 1
     fi
 
