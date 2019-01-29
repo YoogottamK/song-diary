@@ -118,7 +118,7 @@ done
 #=====================================================
 # Generate the id
 #=====================================================
-INPUT[0]=$( echo "${INPUT[1]}" | tr '[:upper:]' '[:lower:]' | md5sum | cut -d' ' -f1)
+INPUT[0]=$( echo "${INPUT[1]} ${INPUT[2]}" | tr '[:upper:]' '[:lower:]' | md5sum | cut -d' ' -f1)
 
 #=====================================================
 # Check for duplicates
