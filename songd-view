@@ -88,7 +88,7 @@ if (( $# > 0 )); then
     query=$( printf "%s," "${INPUT[@]}" | sed 's/,$//g' )
 
     selected=( $( cat "$HEADERS" ) )
-    # Forceful `quote` to accomodate spaces  `quote`
+    # Forceful `quote` to accomodate spaces
     selected+=( "$( cat -n "$DATA" | tr -s ' ' | tr '\t' ',' | cut -d, -f2 --complement | sed -n "/$query/Ip" )" )
 
     if [ -z "${selected[1]}" ]; then
@@ -98,12 +98,12 @@ if (( $# > 0 )); then
 
         for selection in "${selected[@]}"; do
             echo "$selection"
-        done | sed 's/,\(.\)/,\U\1/g' | column -s, -t
+        done | sed 's/,\(.\)/,\U\1/g' | sed 's/,/, | /g' | column -s, -t
     fi
 else
 #=====================================================
 # Display all, no flags passed
 #=====================================================
-    cat "$HEADERS" | sed 's/,\(.\)/,\U\1/g' | cat - "$DATA" | cut -d, -f2- | awk '{ printf("%d,%s\n", i++, $0) }' | sed 's/^0/#/' | column -s, -t
+    cat "$HEADERS" | sed 's/,\(.\)/,\U\1/g' | cat - "$DATA" | cut -d, -f2- | awk '{ printf("%d,%s\n", i++, $0) }' | sed 's/^0/#/' | sed 's/,/, | /g' | column -s, -t
 fi
 
