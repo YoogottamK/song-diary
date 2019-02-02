@@ -44,7 +44,7 @@ if (( $# > 0 )); then
 fi
 
 # list of options
-options=( add delete edit view field "help" )
+options=( add field delete edit view "help" )
 
 # Load the menu function
 . songd-menu.sh
