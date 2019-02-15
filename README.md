@@ -1,6 +1,6 @@
 # Song Diary
 
-This is basically a database for songs, built on bash.
+A database for songs, built using bash.
 
 ## Setup
 
@@ -15,9 +15,9 @@ The main entry point is `songd`.
 
 Almost every feature can be used without passing options.
 
-Then, you can pass different options like `--add` or `--edit`, etc.
+You can also pass different options like `--add` or `--edit`, etc to songd to use cli instead of an interactive menu.
 
-You can pass `-h` option anywhere to know how exactly this works.
+You can pass `-h` option anywhere to know how it works.
 
 Also, you can check the man page for songd by running `man ./songd.1` in the cloned directory to know more.
 
@@ -29,3 +29,4 @@ If you use any other shell [for eg zsh], please create a directory named `bin` i
 i.e., add the following line to `.[your_shell]rc`
 
 `export PATH="$PATH:$HOME/bin"`
+
