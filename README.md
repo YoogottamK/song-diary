@@ -19,7 +19,7 @@ Then, you can pass different options like `--add` or `--edit`, etc.
 
 You can pass `-h` option anywhere to know how exactly this works.
 
-Also, you can check the man page for songd [`man songd`] to know more
+Also, you can check the man page for songd by running `man ./songd.1` in the cloned directory to know more.
 
 ## Note
 

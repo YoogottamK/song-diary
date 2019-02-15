@@ -21,7 +21,7 @@ BIN="$HOME"/bin
 if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
     echo Your PATH doesn\'t contain "$BIN"
     echo Adding "$BIN" to PATH...
-    echo 'export $PATH=$PATH:'"$BIN" >> "$HOME/.bashrc"
+    echo 'export PATH=$PATH:'"$BIN" >> "$HOME/.bashrc"
     echo run 'source ~/.bashrc' to reflect changes
 fi
 
@@ -38,7 +38,7 @@ fi
 FILES=( songd songd-add songd-del songd-edit songd-field songd-view songd-menu.sh songd-help.sh )
 # MAN="songd.1"
 for file in ${FILES[@]}; do
-    [ -e ./$file ] || { (>&2 echo File "$file" not found; echo Aborting); exit 1; }
+    [ -e ./"$file" ] || { (>&2 echo File "$file" not found; echo Aborting); exit 1; }
     cp "./$file" "$BIN"
     chmod +x "$BIN/$file"
 done
